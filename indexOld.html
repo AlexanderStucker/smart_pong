@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeerPong Turnier</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>BeerPong Turnier</h1>
+    <form id="teamForm">
+        <label for="teamName">Teamname:</label>
+        <input type="text" id="teamName" required>
+
+        <label for="teamColor">Teamfarbe:</label>
+        <select id="teamColor" required>
+            <option value="#FF0000">Rot</option>
+            <option value="#0000FF">Blau</option>
+            <option value="#008000">Grün</option>
+            <option value="#FFA500">Orange</option>
+            <option value="#800080">Lila</option>
+        </select>
+
+        <button type="button" onclick="addTeam()">Team hinzufügen</button>
+    </form>
+    <button onclick="clearTeams()">Alle Teams löschen</button>
+
+    <h2>Teams</h2>
+    <ul id="teamList"></ul>
+
+    <button onclick="prepareMatch()" id="matchButton" disabled>Match starten</button>
+
+    <div class="match" id="matchInfo"></div>
+    <button id="endMatchButton" class="hidden" onclick="endMatch()">Match beenden</button>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

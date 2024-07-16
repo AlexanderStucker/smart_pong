@@ -17,27 +17,34 @@ function displayTeams() {
   const list = document.getElementById("teamList");
   list.innerHTML = "";
   teams.forEach((team, index) => {
-    const item = document.createElement("li");
+    const col = document.createElement("div");
+    col.className = "col mb-4 mb-md-2";
+
+    const card = document.createElement("div");
+    card.className = "d-flex align-items-center bg-light rounded-4 p-3 h-100";
+    card.style.color = team.color;
+
     const label = document.createElement("label");
-    const radioInput = document.createElement("input");
-    radioInput.type = "checkbox";
-    radioInput.name = "teamSelection";
-    radioInput.value = index;
-    radioInput.onchange = handleTeamSelection;
+    label.className = "d-flex align-items-center";
+    label.style.width = "100%";
 
-    const points = document.createElement("span");
-    points.textContent = `Punkte: ${team.points}`;
-    points.className = "points";
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "teamSelection";
+    checkbox.className = "form-check-input"
+    checkbox.value = index;
+    checkbox.onchange = handleTeamSelection;
 
-    label.appendChild(radioInput);
-    label.appendChild(document.createTextNode(` ${team.name} `));
-    label.appendChild(points);
-    label.style.color = team.color;
+    const teamInfo = document.createElement("div");
+    teamInfo.className = "ms-3";
+    teamInfo.innerHTML = `<strong>${team.name}</strong><br>Punkte: ${team.points}`;
 
-    item.appendChild(label);
-    list.appendChild(item);
+    label.appendChild(checkbox);
+    label.appendChild(teamInfo);
+    card.appendChild(label);
+    col.appendChild(card);
+    list.appendChild(col);
   });
-  document.getElementById("matchButton").disabled = teams.length < 2;
 }
 
 function clearTeams() {
@@ -47,9 +54,7 @@ function clearTeams() {
 
 function handleTeamSelection() {
   selectedTeams = [];
-  const selections = document.querySelectorAll(
-    'input[name="teamSelection"]:checked'
-  );
+  const selections = document.querySelectorAll('input[name="teamSelection"]:checked');
   selections.forEach((input) => {
     selectedTeams.push(teams[input.value]);
   });
@@ -59,16 +64,17 @@ function handleTeamSelection() {
 
 function prepareMatch() {
   if (selectedTeams.length === 2) {
-      const matchInfo = document.getElementById("matchInfo");
-      matchInfo.innerHTML =
-          generateMatchHTML(selectedTeams[0], 0) +
-          " vs " +
-          generateMatchHTML(selectedTeams[1], 1);
-      document.getElementById("endMatchButton").classList.remove("hidden");
+    const matchInfo = document.getElementById("matchInfo");
+    matchInfo.innerHTML =
+      generateMatchHTML(selectedTeams[0], 0) +
+      " vs " +
+      generateMatchHTML(selectedTeams[1], 1);
+    document.getElementById("endMatchButton").classList.remove("hidden");
+    document.getElementById("gameSection").style.display = "block"; // Show the game section
 
-      // Send the team colors to the ESP32 and start the match
-      sendColorsToESP32(selectedTeams[0].color, selectedTeams[1].color);
-      startMatchOnESP32();
+    // Send the team colors to the ESP32 and start the match
+    sendColorsToESP32(selectedTeams[0].color, selectedTeams[1].color);
+    startMatchOnESP32();
   }
 }
 
@@ -85,36 +91,36 @@ function startMatchOnESP32() {
     },
     body: JSON.stringify(data)
   })
-  .then(response => response.text())
-  .then(data => {
-    console.log('Success:', data);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+    .then(response => response.text())
+    .then(data => {
+      console.log('Success:', data);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 }
 
 function sendColorsToESP32(color1, color2) {
   const url = "http://192.168.70.234/"; // ESP32 IP address
   const data = {
-      team1Color: hexToRgb(color1),
-      team2Color: hexToRgb(color2)
+    team1Color: hexToRgb(color1),
+    team2Color: hexToRgb(color2)
   };
 
   fetch(url, {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
   })
-  .then(response => response.text())
-  .then(data => {
+    .then(response => response.text())
+    .then(data => {
       console.log('Success:', data);
-  })
-  .catch((error) => {
+    })
+    .catch((error) => {
       console.error('Error:', error);
-  });
+    });
 }
 
 function generateMatchHTML(team, index) {
@@ -142,6 +148,7 @@ function endMatch() {
   displayTeams();
   document.getElementById("matchInfo").innerHTML = "";
   document.getElementById("endMatchButton").classList.add("hidden");
+  document.getElementById("gameSection").style.display = "none"; // Hide the game section
 }
 
 function handleButtonPressNotification() {
