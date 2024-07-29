@@ -1,0 +1,10 @@
+body { font-family: Arial, sans-serif; }
+.team-list { margin-top: 20px; }
+li { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.match { margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.team-info { color: #333; font-size: 18px; }
+.team-color { font-weight: bold; }
+.hidden { display: none; }
+.cup-count, .points { font-size: 16px; margin-left: 10px; }
+button.small { padding: 2px 5px; font-size: 0.8rem; }
+.controls { margin-right: 10px; }
