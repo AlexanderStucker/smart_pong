@@ -148,6 +148,7 @@ function endMatch() {
   document.getElementById("matchInfo").innerHTML = "";
   document.getElementById("endMatchButton").classList.add("hidden");
   document.getElementById("gameSection").style.display = "none"; // Hide the game section
+  sendColorsToESP32("#000000", "#000000");
 }
 
 function handleButtonPressNotification() {
