@@ -6,7 +6,7 @@ function addTeam() {
   const teamColor = document.getElementById("teamColor").value;
 
   if (teamName) {
-    const team = { name: teamName, color: teamColor, cups: 6, points: 0 };
+    const team = { name: teamName, color: teamColor, cups: 10, points: 0 };
     teams.push(team);
     displayTeams();
     document.getElementById("teamForm").reset();
@@ -31,7 +31,7 @@ function displayTeams() {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.name = "teamSelection";
-    checkbox.className = "form-check-input"
+    checkbox.className = "form-check-input";
     checkbox.value = index;
     checkbox.onchange = handleTeamSelection;
 
@@ -75,11 +75,12 @@ function prepareMatch() {
     // Send the team colors to the ESP32 and start the match
     sendColorsToESP32(selectedTeams[0].color, selectedTeams[1].color);
     startMatchOnESP32();
+    updateCupsDisplay();
   }
 }
 
 function startMatchOnESP32() {
-  const url = "http://192.168.70.234/"; // ESP32 IP address
+  const url = "http://192.168.78.234/"; // ESP32 IP address
   const data = {
     command: "startMatch"
   };
@@ -101,7 +102,7 @@ function startMatchOnESP32() {
 }
 
 function sendColorsToESP32(color1, color2) {
-  const url = "http://192.168.70.234/"; // ESP32 IP address
+  const url = "http://192.168.78.234/"; // ESP32 IP address
   const data = {
     team1Color: hexToRgb(color1),
     team2Color: hexToRgb(color2)
@@ -125,14 +126,12 @@ function sendColorsToESP32(color1, color2) {
 
 function generateMatchHTML(team, index) {
   return `<div class="team-info">${team.name} <span class="team-color" style="color:${team.color}">●</span> 
-            (<button class="small" onclick="changeCups(${index}, -1)">-</button> 
-            <span id="cups${index}">${team.cups}</span> Becher 
-            <button class="small" onclick="changeCups(${index}, 1)">+</button>)</div>`;
+            <span id="cups${index}">${team.cups}</span> Becher `;
 }
 
 function changeCups(teamIndex, delta) {
   const team = selectedTeams[teamIndex];
-  if (team.cups + delta >= 0 && team.cups + delta <= 6) {
+  if (team.cups + delta >= 0 && team.cups + delta <= 10) {
     team.cups += delta;
     document.getElementById(`cups${teamIndex}`).textContent = team.cups;
   }
@@ -144,7 +143,7 @@ function endMatch() {
   } else if (selectedTeams[0].cups < selectedTeams[1].cups) {
     teams[teams.indexOf(selectedTeams[1])].points++;
   }
-  selectedTeams.forEach((team) => (team.cups = 6));
+  selectedTeams.forEach((team) => (team.cups = 10));
   displayTeams();
   document.getElementById("matchInfo").innerHTML = "";
   document.getElementById("endMatchButton").classList.add("hidden");
@@ -159,7 +158,7 @@ function handleButtonPressNotification() {
 }
 
 function checkButtonStatus() {
-  const url = "http://192.168.70.234/button-status"; // ESP32 IP address
+  const url = "http://192.168.78.234/button-status"; // ESP32 IP address
 
   fetch(url)
     .then(response => response.text())
@@ -167,6 +166,22 @@ function checkButtonStatus() {
       if (status === "pressed") {
         handleButtonPressNotification();
       }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
+
+function updateCupsDisplay() {
+  const url = "http://192.168.78.234/cups-count"; // ESP32 IP address
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      selectedTeams[0].cups = data.cupsCount1;
+      selectedTeams[1].cups = data.cupsCount2;
+      document.getElementById(`cups0`).textContent = data.cupsCount1;
+      document.getElementById(`cups1`).textContent = data.cupsCount2;
     })
     .catch(error => {
       console.error('Error:', error);
@@ -186,6 +201,7 @@ function hexToRgb(hex) {
 }
 
 setInterval(checkButtonStatus, 1000); // Check every second
+setInterval(updateCupsDisplay, 1000); // Update cups count every 3 seconds
 
 document.addEventListener("DOMContentLoaded", () => {
   checkButtonStatus();
